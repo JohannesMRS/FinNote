@@ -14,6 +14,14 @@ class Transaction extends Model
         'transaction_date'
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'amount'=>'int',
+            'transaction_date'=>'date'
+        ];
+    }
+
     public function monthly_budget(): BelongsTo
     {
         return $this->belongsTo(Monthly_budget::class);
