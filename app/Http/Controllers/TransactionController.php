@@ -96,7 +96,7 @@ class TransactionController extends Controller
         return redirect()->route('transaction.index', [
             'month'=>$budget->month,
             'year'=>$budget->year
-        ])->with('success', 'Transaksi berhasil di tambahkan')
+        ])->with('success', 'Transaksi berhasil di tambahkan');
     }
 
 
