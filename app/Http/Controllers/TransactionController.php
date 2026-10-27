@@ -63,4 +63,41 @@ class TransactionController extends Controller
             return view('transaction.index', compact('budget', 'transaction', 'totalIncome', 'totalExpense', 'remainingBalance'));
             
     }
+
+    public function store(Request $request){
+        $validated = $request([
+            'monthly_budget_id'=>['require', 'integer', 'exist:monthly_budgets_id'],
+            'description'=>['required', 'string', 'max:255'],
+            'amount'=>['required', 'integer', 'min:1'],
+            'type'=>['required', 'in:income,expense'],
+            'transaction_date'=>['required', 'date_format:Y-m-d']
+        ]);
+
+        $budget = Monthly_budget::query()
+            ->where('user_id', $request->user()->id)
+            ->findOrFail($validated['monthly_budget_id']);
+        
+            $transactionDate = \Illuminate\Support\Carbon::createFromFormat(
+                '!Y-m-d',
+                $validated['transaction_date']
+            );
+
+            if($transactionDate->month !== (int) $budget->month || $transactionDate->year !== (int) $budget->year){
+                return back()->withErrors(['transaction_date'=>'Tanggal harus sesuai dengan anggaran bulanan'])->withInput();
+            }
+
+        $budget->transactions()->create([
+            'description'=> $validated['description'],
+            'amount' => $validated['amount'],
+            'type' => $validated['type'],
+            'transaction_date' => $validated['transaction_date']
+        ]);
+
+        return redirect()->route('transaction.index', [
+            'month'=>$budget->month,
+            'year'=>$budget->year
+        ])->with('success', 'Transaksi berhasil di tambahkan')
+    }
+
+
 }
